@@ -63,7 +63,7 @@ return [
     |
     */
 
-    'guards' => env('LIGHTHOUSE_GUARD', 'api'),
+    'guards' => [env('LIGHTHOUSE_GUARD', 'api')],
 
     /*
     |--------------------------------------------------------------------------

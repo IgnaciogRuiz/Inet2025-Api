@@ -16,7 +16,6 @@ class HistoricalOrderDetails extends Model
      * @var array
      */
     protected $fillable = [
-        'historicalOrder_id',
         'product_id',
         'quantity',
         'subtotal_price',
@@ -49,8 +48,4 @@ class HistoricalOrderDetails extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function historicalOrder(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\HistoricalOrders::class);
-    }
 }

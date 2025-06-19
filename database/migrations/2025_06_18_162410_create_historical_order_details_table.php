@@ -15,7 +15,6 @@ return new class extends Migration
 
         Schema::create('historical_order_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('historicalOrder_id')->constrained();
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
             $table->decimal('subtotal_price', 8, 2);

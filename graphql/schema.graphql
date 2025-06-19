@@ -1,0 +1,403 @@
+
+scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
+
+type Query {
+    # User queries
+    user(id: ID! @eq): User @find
+    users: [User!]! @all
+    
+    # Product queries
+    product(id: ID! @eq): Product @find
+    products: [Product!]! @all
+    
+    # Order queries
+    order(id: ID! @eq): Order @find
+    orders: [Order!]!  @all
+   #userOrders(user_id: ID! @eq): [Order!]!
+    
+    # Company queries
+    company(id: ID! @eq): Company @find
+    companies: [Company!]! @all
+    
+    # Flights queries
+    flight(id: ID! @eq): Flight @find
+    flights: [Flight!]! @all
+   #activeFlights: [Flight!]! @where(key: "active", value: true)
+    
+    # Cars queries
+    car(id: ID! @eq): Car @find
+    cars: [Car!]!  @all
+    #activeCars: [Car!]! @where(key: "active", value: true) 
+    
+    # Stay queries
+    stay(id: ID! @eq): Stay @find
+    stays: [Stay!]! @all
+    #activeStays: [Stay!]! @where(key: "active", value: true)
+    
+    # Capacity queries
+    capacity(id: ID! @eq): Capacity @find
+    capacities: [Capacity!]!  @all
+    
+    # Residence queries
+    residence(id: ID! @eq): Residence @find
+    residences: [Residence!]! @all
+    
+    # Payment queries
+    payment(id: ID! @eq): Payment @find
+    payments: [Payment!]! @all
+    #orderPayments(order_id: ID! @eq): [Payment!]! 
+    
+    # Historical queries
+    historicalOrder(id: ID! @eq): HistoricalOrder @find
+    historicalOrders: [HistoricalOrder!]! @all
+    #userHistoricalOrders(user_id: ID! @eq): [HistoricalOrder!]! 
+}
+
+
+
+
+# Types
+type User {
+    id: ID!
+    firstname: String!
+    lastname: String!
+    email: String!
+    password: String!
+    admin: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    orders: [Order!]! @hasMany
+    cart: [Cart!]! @hasMany
+    residence: UserResidence @hasOne
+    historicalOrders: [HistoricalOrder!]! @hasMany
+}
+
+type Product {
+    id: ID!
+    product_code: String!
+    name: String!
+    description: String
+    price: Float!
+    scope: ProductScope!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    capacity: Capacity @belongsTo
+    orderDetails: [OrderDetail!]! @hasMany
+    cartItems: [Cart!]! @hasMany
+    historicalOrderDetails: [HistoricalOrderDetail!]! @hasMany
+    flight: Flight @hasOne
+    car: Car @hasOne
+    stay: Stay @hasOne
+}
+
+type Order {
+    id: ID!
+    status: OrderStatus!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    user: User! @belongsTo
+    orderDetails: [OrderDetail!]! @hasMany
+    payments: [Payment!]! @hasMany
+}
+
+type OrderDetail {
+    id: ID!
+    quantity: Int!
+    subtotal_price: Float!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    order: Order! @belongsTo
+    product: Product! @belongsTo
+}
+
+type Company {
+    id: ID!
+    name: String!
+    area: String!
+    email: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Flight {
+    id: ID!
+    origin: String!
+    destination: String!
+    airline: String!
+    active: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    product: Product! @belongsTo
+}
+
+type Car {
+    id: ID!
+    brand: String!
+    model: String!
+    agency: String!
+    active: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Stay {
+    id: ID!
+    name: String!
+    duration: String!
+    type: StayType!
+    active: Boolean!
+    created_at: DateTime!
+    updated_at: DateTime!
+}
+
+type Capacity {
+    id: ID!
+    name: String!
+    capacity: Int!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    products: [Product!]! @hasMany
+}
+
+type Residence {
+    id: ID!
+    zip_code: String!
+    locality: String!
+    street: String!
+    number: String!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    userResidence: UserResidence @hasOne
+}
+
+type UserResidence {
+    id: ID!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    user: User! @belongsTo
+    residence: Residence! @belongsTo
+}
+
+type Cart {
+    id: ID!
+    quantity: Int!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    user: User! @belongsTo
+    product: Product! @belongsTo
+}
+
+type Payment {
+    id: ID!
+    amount: Float!
+    payment_method: String!
+    status: String!
+    date: DateTime!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    order: Order! @belongsTo
+}
+
+type HistoricalOrder {
+    id: ID!
+    status: String!
+    delivery_date: DateTime!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    user: User! @belongsTo
+    historicalOrderDetails: [HistoricalOrderDetail!]! @hasMany
+}
+
+type HistoricalOrderDetail {
+    id: ID!
+    quantity: Int!
+    subtotal_price: Float!
+    created_at: DateTime!
+    updated_at: DateTime!
+    
+    # Relationships
+    historicalOrder: HistoricalOrder! @belongsTo
+    product: Product! @belongsTo
+}
+
+# Enums
+enum OrderStatus {
+    PENDING @enum(value: "pending")
+    PROCESSING @enum(value: "processing")
+    SHIPPED @enum(value: "shipped")
+    DELIVERED @enum(value: "delivered")
+    CANCELLED @enum(value: "cancelled")
+}
+
+enum ProductScope {
+    FLIGHT @enum(value: "flight")
+    CAR @enum(value: "car")
+    STAY @enum(value: "stay")
+}
+
+enum StayType {
+    HOTEL @enum(value: "hotel")
+    APARTMENT @enum(value: "apartment")
+    HOUSE @enum(value: "house")
+    HOSTEL @enum(value: "hostel")
+}
+
+# Input Types
+input CreateUserInput {
+    firstname: String!
+    lastname: String!
+    email: String! @rules(apply: ["email", "unique:users,email"])
+    password: String! @rules(apply: ["min:8"])
+    admin: Boolean = false
+}
+
+input UpdateUserInput {
+    firstname: String
+    lastname: String
+    email: String @rules(apply: ["email"])
+    password: String @rules(apply: ["min:8"])
+    admin: Boolean
+}
+
+input CreateProductInput {
+    product_code: String! @rules(apply: ["unique:products,product_code"])
+    name: String!
+    description: String
+    price: Float! @rules(apply: ["min:0"])
+    scope: ProductScope!
+    capacity_id: ID
+}
+
+input UpdateProductInput {
+    product_code: String
+    name: String
+    description: String
+    price: Float @rules(apply: ["min:0"])
+    scope: ProductScope
+    capacity_id: ID
+}
+
+input CreateOrderInput {
+    user_id: ID! @rules(apply: ["exists:users,id"])
+    status: OrderStatus = PENDING
+}
+
+input UpdateOrderInput {
+    status: OrderStatus
+}
+
+input CreateCompanyInput {
+    name: String!
+    area: String!
+    email: String! @rules(apply: ["email"])
+}
+
+input UpdateCompanyInput {
+    name: String
+    area: String
+    email: String @rules(apply: ["email"])
+}
+
+input CreateFlightInput {
+    origin: String!
+    destination: String!
+    airline: String!
+    active: Boolean = true
+    product_id: ID! @rules(apply: ["exists:products,id"])
+}
+
+input UpdateFlightInput {
+    origin: String
+    destination: String
+    airline: String
+    active: Boolean
+}
+
+input CreateCarInput {
+    brand: String!
+    model: String!
+    agency: String!
+    active: Boolean = true
+}
+
+input UpdateCarInput {
+    brand: String
+    model: String
+    agency: String
+    active: Boolean
+}
+
+input CreateStayInput {
+    name: String!
+    duration: String!
+    type: StayType!
+    active: Boolean = true
+}
+
+input UpdateStayInput {
+    name: String
+    duration: String
+    type: StayType
+    active: Boolean
+}
+
+input CreateCapacityInput {
+    name: String!
+    capacity: Int! @rules(apply: ["min:1"])
+}
+
+input UpdateCapacityInput {
+    name: String
+    capacity: Int @rules(apply: ["min:1"])
+}
+
+input CreateResidenceInput {
+    zip_code: String!
+    locality: String!
+    street: String!
+    number: String!
+}
+
+input UpdateResidenceInput {
+    zip_code: String
+    locality: String
+    street: String
+    number: String
+}
+
+input CreatePaymentInput {
+    order_id: ID! @rules(apply: ["exists:orders,id"])
+    amount: Float! @rules(apply: ["min:0"])
+    payment_method: String!
+    status: String!
+    date: DateTime!
+}
+
+input UpdatePaymentInput {
+    amount: Float @rules(apply: ["min:0"])
+    payment_method: String
+    status: String
+    date: DateTime
+}
