@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('flights', function (Blueprint $table) {
+        Schema::create('stay', function (Blueprint $table) {
             $table->id();
-            $table->string('origin');
-            $table->string('destination');
-            $table->string('airline');
-            $table->boolean('active');
+            $table->string('name');
+            $table->string('duration');
+            $table->enum('type', ["hotel", "hostel", "apartment"]);
             $table->timestamps();
         });
 
@@ -30,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('flights');
+        Schema::dropIfExists('stay');
     }
 };

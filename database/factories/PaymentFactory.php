@@ -16,6 +16,10 @@ class PaymentFactory extends Factory
      */
     protected $model = Payment::class;
 
+    protected $casts = [
+        'date' => 'datetime',
+    ];
+
     /**
      * Define the model's default state.
      */

@@ -23,8 +23,7 @@ class StayFactory extends Factory
         return [
             'name' => fake()->name(),
             'duration' => fake()->word(),
-            'type' => fake()->randomElement(["hotel","hostel","apartment"]),
-            'active' => fake()->boolean(),
+            'type' => fake()->randomElement(["hotel", "hostel", "apartment"]),
         ];
     }
 }

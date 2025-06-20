@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class Product extends Model
 {
@@ -23,7 +23,7 @@ class Product extends Model
         'description',
         'price',
         'scope',
-        'capacity_id',
+        'capacity',
     ];
 
     /**
@@ -36,13 +36,19 @@ class Product extends Model
         return [
             'id' => 'integer',
             'price' => 'decimal:2',
-            'capacity_id' => 'integer',
         ];
     }
 
-    public function capacity(): BelongsTo
+    protected function isPackage(): Attribute
     {
-        return $this->belongsTo(Capacity::class);
+        return Attribute::get(function () {
+            $count = 0;
+            if ($this->flights()->exists()) $count++;
+            if ($this->cars()->exists()) $count++;
+            if ($this->stays()->exists()) $count++;
+
+            return $count >= 2;
+        });
     }
 
     public function carts(): HasMany
@@ -62,12 +68,12 @@ class Product extends Model
 
     public function cars(): BelongsToMany
     {
-        return $this->belongsToMany(Cars::class);
+        return $this->belongsToMany(Car::class);
     }
 
     public function flights(): BelongsToMany
     {
-        return $this->belongsToMany(Flights::class);
+        return $this->belongsToMany(Flight::class);
     }
 
     public function stays(): BelongsToMany

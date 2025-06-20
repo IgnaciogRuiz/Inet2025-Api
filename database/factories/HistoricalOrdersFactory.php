@@ -24,7 +24,6 @@ class HistoricalOrdersFactory extends Factory
         return [
             'user_id' => User::factory(),
             'status' => fake()->word(),
-            'delivery_date' => fake()->date(),
         ];
     }
 }

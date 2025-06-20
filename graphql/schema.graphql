@@ -13,30 +13,24 @@ type Query @guard {
     # Order queries
     order(id: ID! @eq): Order @find
     orders: [Order!]!  @all
-   #userOrders(user_id: ID! @eq): [Order!]!
+    #userOrders(user_id: ID! @eq): [Order!]!
     
     # Company queries
     company(id: ID! @eq): Company @find
     companies: [Company!]! @all
     
-    # Flights queries
+    # flight queries
     flight(id: ID! @eq): Flight @find
     flights: [Flight!]! @all
-   #activeFlights: [Flight!]! @where(key: "active", value: true)
     
-    # Cars queries
+    # car queries
     car(id: ID! @eq): Car @find
     cars: [Car!]!  @all
-    #activeCars: [Car!]! @where(key: "active", value: true) 
     
     # Stay queries
     stay(id: ID! @eq): Stay @find
     stays: [Stay!]! @all
-    #activeStays: [Stay!]! @where(key: "active", value: true)
-    
-    # Capacity queries
-    capacity(id: ID! @eq): Capacity @find
-    capacities: [Capacity!]!  @all
+
     
     # Residence queries
     residence(id: ID! @eq): Residence @find
@@ -52,6 +46,58 @@ type Query @guard {
     historicalOrders: [HistoricalOrder!]! @all
     #userHistoricalOrders(user_id: ID! @eq): [HistoricalOrder!]! 
 }
+
+extend type Query @guard {
+  me: User @field(resolver: "UserQuery@me")
+  myOrders: [Order!]! @field(resolver: "UserQuery@orders")
+}
+
+
+# --- Carrito ---
+extend type Mutation @guard {
+  addToCart(product_id: ID!, quantity: Int!): Cart @field(resolver: "CartMutation@add")
+  removeFromCart(cart_id: ID!): Boolean @field(resolver: "CartMutation@remove")
+  clearCart(user_id: ID!): Boolean @field(resolver: "CartMutation@clear")
+
+  # --- Domicilio ---
+  createResidence(input: CreateResidenceInput!): Residence @field(resolver: "ResidenceMutation@create")
+  updateResidence(input: UpdateResidenceInput!): Residence @field(resolver: "ResidenceMutation@update")
+  deleteResidence(id: ID!): Boolean @field(resolver: "ResidenceMutation@delete")
+
+
+  # --- Pago (simulado) ---
+  createPayment(input: CreatePaymentInput!): Payment @field(resolver: "PaymentMutation@create")
+
+  # --- Crear y modificar orden ---
+  createOrderFromCart: Order @field(resolver: "OrderMutation@createFromCart")
+  updateOrder(id: ID!, input: UpdateOrderInput!): Order @field(resolver: "OrderMutation@update")
+
+  # --- Histórico ---
+  archiveOrder(order_id: ID!): HistoricalOrder @field(resolver: "HistoricalOrderMutation@archive")
+
+  # --- Crear producto con vuelo/estadia/auto ---
+  createProduct(
+    input: CreateProductInput!
+    flight: CreateFlightInput
+    stay: CreateStayInput
+    car: CreateCarInput
+  ): CreateProductResponse @field(resolver: "ProductMutation@createFull")
+
+  updateProduct(id: ID!,     
+    input: UpdateProductInput!
+    flight: UpdateFlightInput
+    stay: UpdateStayInput
+    car: UpdateCarInput): Product @field(resolver: "ProductMutation@update")
+
+  # --- Modificar company ---
+  updateCompany(
+    id: ID!,
+    name: String,
+    area: String,
+    email: String
+  ): Company @update
+}
+
 
 
 
@@ -81,17 +127,24 @@ type Product {
     description: String
     price: Float!
     scope: ProductScope!
+    capacity: Int!
+    #active: Boolean!
     created_at: DateTime!
     updated_at: DateTime!
+    is_package: Boolean!
     
     # Relationships
-    capacity: Capacity @belongsTo
     orderDetails: [OrderDetail!]! @hasMany
     cartItems: [Cart!]! @hasMany
     historicalOrderDetails: [HistoricalOrderDetail!]! @hasMany
-    flight: Flight @hasOne
-    car: Car @hasOne
-    stay: Stay @hasOne
+    flights: [Flight!]! @belongsToMany
+    cars: [Car!]! @belongsToMany
+    stays: [Stay!]! @belongsToMany
+}
+
+type CreateProductResponse {
+  message: String!
+  product: Product!
 }
 
 type Order {
@@ -160,16 +213,6 @@ type Stay {
     updated_at: DateTime!
 }
 
-type Capacity {
-    id: ID!
-    name: String!
-    capacity: Int!
-    created_at: DateTime!
-    updated_at: DateTime!
-    
-    # Relationships
-    products: [Product!]! @hasMany
-}
 
 type Residence {
     id: ID!
@@ -210,7 +253,7 @@ type Payment {
     amount: Float!
     payment_method: String!
     status: String!
-    date: DateTime!
+    date: String!
     created_at: DateTime!
     updated_at: DateTime!
     
@@ -221,7 +264,6 @@ type Payment {
 type HistoricalOrder {
     id: ID!
     status: String!
-    delivery_date: DateTime!
     created_at: DateTime!
     updated_at: DateTime!
     
@@ -252,9 +294,9 @@ enum OrderStatus {
 }
 
 enum ProductScope {
-    FLIGHT @enum(value: "flight")
-    CAR @enum(value: "car")
-    STAY @enum(value: "stay")
+    LOCAL @enum(value: "local")
+    NACIONAL @enum(value: "national")
+    INTERNACIONAL @enum(value: "international")
 }
 
 enum StayType {
@@ -287,7 +329,7 @@ input CreateProductInput {
     description: String
     price: Float! @rules(apply: ["min:0"])
     scope: ProductScope!
-    capacity_id: ID
+    capacity: Int!
 }
 
 input UpdateProductInput {
@@ -296,7 +338,7 @@ input UpdateProductInput {
     description: String
     price: Float @rules(apply: ["min:0"])
     scope: ProductScope
-    capacity_id: ID
+    capacity: Int
 }
 
 input CreateOrderInput {
@@ -325,7 +367,6 @@ input CreateFlightInput {
     destination: String!
     airline: String!
     active: Boolean = true
-    product_id: ID! @rules(apply: ["exists:products,id"])
 }
 
 input UpdateFlightInput {
@@ -363,16 +404,6 @@ input UpdateStayInput {
     active: Boolean
 }
 
-input CreateCapacityInput {
-    name: String!
-    capacity: Int! @rules(apply: ["min:1"])
-}
-
-input UpdateCapacityInput {
-    name: String
-    capacity: Int @rules(apply: ["min:1"])
-}
-
 input CreateResidenceInput {
     zip_code: String!
     locality: String!
@@ -381,6 +412,7 @@ input CreateResidenceInput {
 }
 
 input UpdateResidenceInput {
+    id: Int!
     zip_code: String
     locality: String
     street: String
@@ -392,7 +424,6 @@ input CreatePaymentInput {
     amount: Float! @rules(apply: ["min:0"])
     payment_method: String!
     status: String!
-    date: DateTime!
 }
 
 input UpdatePaymentInput {

@@ -19,8 +19,9 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->decimal('price', 8, 2);
-            $table->enum('scope', ["local","national","international"]);
-            $table->foreignId('capacity_id')->constrained();
+            $table->enum('scope', ["local", "national", "international"]);
+            $table->integer('capacity');
+            $table->boolean('active')->default(true);
             $table->timestamps();
         });
 

@@ -6,20 +6,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Flights extends Model
+class Car extends Model
 {
     use HasFactory;
 
+    protected $table = 'car';
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'origin',
-        'destination',
-        'airline',
-        'active',
+        'brand',
+        'model',
+        'agency',
     ];
 
     /**
@@ -31,7 +31,6 @@ class Flights extends Model
     {
         return [
             'id' => 'integer',
-            'active' => 'boolean',
         ];
     }
 

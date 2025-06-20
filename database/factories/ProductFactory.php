@@ -26,8 +26,8 @@ class ProductFactory extends Factory
             'name' => fake()->name(),
             'description' => fake()->text(),
             'price' => fake()->randomFloat(2, 0, 999999.99),
-            'scope' => fake()->randomElement(["local","national","international"]),
-            'capacity_id' => Capacity::factory(),
+            'scope' => fake()->randomElement(["local", "national", "international"]),
+            'capacity' => fake()->numberBetween(1, 10),
         ];
     }
 }

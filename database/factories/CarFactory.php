@@ -4,16 +4,16 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\Capacity;
+use App\Models\car;
 
-class CapacityFactory extends Factory
+class carFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = Capacity::class;
+    protected $model = car::class;
 
     /**
      * Define the model's default state.
@@ -21,8 +21,9 @@ class CapacityFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'capacity' => fake()->numberBetween(-10000, 10000),
+            'brand' => fake()->word(),
+            'model' => fake()->word(),
+            'agency' => fake()->word(),
         ];
     }
 }

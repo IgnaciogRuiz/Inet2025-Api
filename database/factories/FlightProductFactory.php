@@ -4,18 +4,18 @@ namespace Database\Factories;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
-use App\Models\Car;
-use App\Models\CarsProduct;
+use App\Models\Flight;
+use App\Models\FlightProduct;
 use App\Models\Product;
 
-class CarsProductFactory extends Factory
+class flightProductFactory extends Factory
 {
     /**
      * The name of the factory's corresponding model.
      *
      * @var string
      */
-    protected $model = CarsProduct::class;
+    protected $model = FlightProduct::class;
 
     /**
      * Define the model's default state.
@@ -23,7 +23,7 @@ class CarsProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'cars_id' => Car::factory(),
+            'flight_id' => Flight::factory(),
             'product_id' => Product::factory(),
         ];
     }

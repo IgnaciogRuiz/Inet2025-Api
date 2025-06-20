@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('order_id')->constrained();
             $table->foreignId('product_id')->constrained();
             $table->integer('quantity');
-            $table->decimal('subtotal_price', 8, 2);
+            $table->decimal('subtotal_price', 10, 2);
             $table->timestamps();
         });
 

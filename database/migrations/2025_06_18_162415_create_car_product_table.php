@@ -13,13 +13,9 @@ return new class extends Migration
     {
         Schema::disableForeignKeyConstraints();
 
-        Schema::create('stays', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('duration');
-            $table->enum('type', ["hotel","hostel","apartment"]);
-            $table->boolean('active');
-            $table->timestamps();
+        Schema::create('car_product', function (Blueprint $table) {
+            $table->foreignId('car_id');
+            $table->foreignId('product_id');
         });
 
         Schema::enableForeignKeyConstraints();
@@ -30,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('stays');
+        Schema::dropIfExists('car_product');
     }
 };

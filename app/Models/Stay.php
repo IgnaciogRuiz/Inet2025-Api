@@ -10,6 +10,7 @@ class Stay extends Model
 {
     use HasFactory;
 
+    protected $table = 'stay';
     /**
      * The attributes that are mass assignable.
      *
@@ -19,7 +20,6 @@ class Stay extends Model
         'name',
         'duration',
         'type',
-        'active',
     ];
 
     /**
@@ -31,7 +31,6 @@ class Stay extends Model
     {
         return [
             'id' => 'integer',
-            'active' => 'boolean',
         ];
     }
 
