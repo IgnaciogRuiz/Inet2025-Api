@@ -22,6 +22,7 @@ class CompanyFactory extends Factory
     {
         return [
             'name' => fake()->name(),
+            'nit' => fake()->word(),
             'area' => fake()->word(),
             'email' => fake()->safeEmail(),
         ];

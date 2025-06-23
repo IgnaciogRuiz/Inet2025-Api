@@ -121,4 +121,28 @@ class ProductMutation
             return $product->fresh(['flights', 'stays', 'cars']);
         });
     }
+    public function deleteFull($root, array $args): array
+    {
+        return DB::transaction(function () use ($args) {
+
+            $product = Product::find($args['id']);
+            if (!$product) {
+                throw new Error('Producto no encontrado');
+            }
+
+
+            $product->flights()->detach();
+
+            $product->stays()->detach();
+
+            $product->cars()->detach();
+
+            $product->delete();
+
+            return [
+                'success' => true,
+                'message' => 'Producto eliminado correctamente',
+            ];
+        });
+    }
 }

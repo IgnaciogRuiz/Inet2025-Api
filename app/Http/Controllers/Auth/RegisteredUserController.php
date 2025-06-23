@@ -19,25 +19,32 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'firstname'     => 'required|string|min:4',
-            'lastname'     => 'required|string|min:4',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
-            'repassword' => 'required|string|same:password',
+            'lastname'      => 'required|string|min:4',
+            'email'         => 'required|string|email|max:255|unique:users',
+            'password'      => 'required|string|min:8',
+            'repassword'    => 'required|string|same:password',
         ]);
 
         try {
             $user = new User();
-            $user->firstname      = $request->firstname;
-            $user->lastname      = $request->lastname;
+            $user->firstname = $request->firstname;
+            $user->lastname  = $request->lastname;
             $user->email     = $request->email;
             $user->password  = Hash::make($request->password);
-            $user->admin = false; // Default to non-admin user
+            $user->admin     = false;
             $user->save();
+
+            // ⬇️ Generar token y devolverlo con el usuario
+            $token = $user->createToken('')->accessToken;
 
             return response()->json([
                 'response_code' => 201,
                 'status'        => 'success',
-                'message'       => 'Successfully registered',
+                'message'       => 'Successfully registered and logged in',
+                'data' => [
+                    'token' => $token,
+                    'user'  => $user,
+                ]
             ], 201);
         } catch (\Exception $e) {
             Log::error('Registration Error: ' . $e->getMessage());

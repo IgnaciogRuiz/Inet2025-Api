@@ -42,8 +42,8 @@ type Query @guard {
     #orderPayments(order_id: ID! @eq): [Payment!]! 
     
     # Historical queries
-    historicalOrder(id: ID! @eq): HistoricalOrder @find
-    historicalOrders: [HistoricalOrder!]! @all
+    historicalOrder(id: ID! @eq): HistoricalOrders @find(model: "HistoricalOrders")
+    historicalOrders: [HistoricalOrders!]! @all(model: "HistoricalOrders")
     #userHistoricalOrders(user_id: ID! @eq): [HistoricalOrder!]! 
 }
 
@@ -73,7 +73,7 @@ extend type Mutation @guard {
   updateOrder(id: ID!, input: UpdateOrderInput!): Order @field(resolver: "OrderMutation@update")
 
   # --- Histórico ---
-  archiveOrder(order_id: ID!): HistoricalOrder @field(resolver: "HistoricalOrderMutation@archive")
+  archiveOrder(order_id: ID!): HistoricalOrders @field(resolver: "HistoricalOrderMutation@archive")
 
   # --- Crear producto con vuelo/estadia/auto ---
   createProduct(
@@ -89,10 +89,13 @@ extend type Mutation @guard {
     stay: UpdateStayInput
     car: UpdateCarInput): Product @field(resolver: "ProductMutation@update")
 
+  deleteProduct(id: ID!): Boolean @field(resolver: "ProductMutation@deleteFull")
+
   # --- Modificar company ---
   updateCompany(
     id: ID!,
     name: String,
+    nit: String,
     area: String,
     email: String
   ): Company @update
@@ -117,7 +120,7 @@ type User {
     orders: [Order!]! @hasMany
     cart: [Cart!]! @hasMany
     residence: UserResidence @hasOne
-    historicalOrders: [HistoricalOrder!]! @hasMany
+    historicalOrders: [HistoricalOrders!]! @hasMany
 }
 
 type Product {
@@ -174,6 +177,7 @@ type OrderDetail {
 type Company {
     id: ID!
     name: String!
+    nit: String!
     area: String!
     email: String!
     created_at: DateTime!
@@ -261,7 +265,7 @@ type Payment {
     order: Order! @belongsTo
 }
 
-type HistoricalOrder {
+type HistoricalOrders {
     id: ID!
     status: String!
     created_at: DateTime!
@@ -280,7 +284,7 @@ type HistoricalOrderDetail {
     updated_at: DateTime!
     
     # Relationships
-    historicalOrder: HistoricalOrder! @belongsTo
+    historicalOrders: HistoricalOrders! @belongsTo
     product: Product! @belongsTo
 }
 

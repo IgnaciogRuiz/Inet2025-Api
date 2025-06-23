@@ -29,8 +29,16 @@ class AuthenticatedSessionController extends Controller
         return response()->json([
             'status' => 'success',
             'data' => [
-                'token' => $token
+                'token' => $token,
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'firstname' => $user->firstname,
+                    'lastname' => $user->lastname,
+                    'admin' => $user->admin,
+                ]
             ],
+
         ]);
     }
 
@@ -41,8 +49,8 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request)
     {
-        // Invalidar el token actual
-        $request->user()->currentAccessToken()->delete();
+        $accessToken = $request->user()->token();
+        $accessToken->revoke();
 
         return response()->noContent();
     }

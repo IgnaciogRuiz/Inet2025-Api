@@ -28,8 +28,19 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+
+        User::factory()->create([
+            'email' => env('ADMIN_EMAIL'),
+            'firstname' => env('ADMIN_FIRSTNAME'),
+            'lastname' => env('ADMIN_LASTNAME'),
+            'password' => bcrypt(env('ADMIN_PASSWORD')),
+            'admin' => true,
+        ]);
+
+
+
         User::factory(10)->create();
-        Company::factory(10)->create();
+        Company::factory(1)->create();
         Order::factory(10)->create();
         OrderDetail::factory(10)->create();
         Cart::factory(10)->create();
