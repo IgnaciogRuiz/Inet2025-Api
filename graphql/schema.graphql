@@ -1,23 +1,10 @@
 
 scalar DateTime @scalar(class: "Nuwave\\Lighthouse\\Schema\\Types\\Scalars\\DateTime")
 
-type Query @guard {
-    # User queries
-    user(id: ID! @eq): User @find
-    users: [User!]! @all
-    
+type Query {
     # Product queries
     product(id: ID! @eq): Product @find
-    products: [Product!]! @all
-    
-    # Order queries
-    order(id: ID! @eq): Order @find
-    orders: [Order!]!  @all
-    #userOrders(user_id: ID! @eq): [Order!]!
-    
-    # Company queries
-    company(id: ID! @eq): Company @find
-    companies: [Company!]! @all
+    products: [Product!]! @all    
     
     # flight queries
     flight(id: ID! @eq): Flight @find
@@ -31,6 +18,23 @@ type Query @guard {
     stay(id: ID! @eq): Stay @find
     stays: [Stay!]! @all
 
+}
+
+extend type Query @guard {
+    me: User @field(resolver: "UserQuery@me")
+     myOrders: [Order!]! @field(resolver: "UserQuery@orders")    
+    # User queries
+    user(id: ID! @eq): User @find
+    users: [User!]! @all
+    
+    # Order queries
+    order(id: ID! @eq): Order @find
+    orders: [Order!]!  @all
+    #userOrders(user_id: ID! @eq): [Order!]!
+    
+    # Company queries
+    company(id: ID! @eq): Company @find
+    companies: [Company!]! @all
     
     # Residence queries
     residence(id: ID! @eq): Residence @find
@@ -47,10 +51,6 @@ type Query @guard {
     #userHistoricalOrders(user_id: ID! @eq): [HistoricalOrder!]! 
 }
 
-extend type Query @guard {
-  me: User @field(resolver: "UserQuery@me")
-  myOrders: [Order!]! @field(resolver: "UserQuery@orders")
-}
 
 
 # --- Carrito ---
@@ -73,7 +73,7 @@ extend type Mutation @guard {
   updateOrder(id: ID!, input: UpdateOrderInput!): Order @field(resolver: "OrderMutation@update")
 
   # --- Histórico ---
-  archiveOrder(order_id: ID!): HistoricalOrders @field(resolver: "HistoricalOrderMutation@archive")
+  archiveOrder(order_id: ID!, new_status: OrderStatus! ): HistoricalOrders @field(resolver: "HistoricalOrderMutation@archive")
 
   # --- Crear producto con vuelo/estadia/auto ---
   createProduct(
@@ -87,9 +87,9 @@ extend type Mutation @guard {
     input: UpdateProductInput!
     flight: UpdateFlightInput
     stay: UpdateStayInput
-    car: UpdateCarInput): Product @field(resolver: "ProductMutation@update")
+    car: UpdateCarInput): UpdateProductResponse @field(resolver: "ProductMutation@update")
 
-  deleteProduct(id: ID!): Boolean @field(resolver: "ProductMutation@deleteFull")
+  toggleProductEnabled(id: ID!): Boolean @field(resolver: "ProductMutation@toggleProductEnabled")
 
   # --- Modificar company ---
   updateCompany(
@@ -131,7 +131,7 @@ type Product {
     price: Float!
     scope: ProductScope!
     capacity: Int!
-    #active: Boolean!
+    active: Boolean!
     created_at: DateTime!
     updated_at: DateTime!
     is_package: Boolean!
@@ -146,6 +146,11 @@ type Product {
 }
 
 type CreateProductResponse {
+  message: String!
+  product: Product!
+}
+
+type UpdateProductResponse {
   message: String!
   product: Product!
 }
@@ -343,6 +348,7 @@ input UpdateProductInput {
     price: Float @rules(apply: ["min:0"])
     scope: ProductScope
     capacity: Int
+    active: Boolean
 }
 
 input CreateOrderInput {

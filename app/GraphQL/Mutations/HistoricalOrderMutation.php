@@ -13,18 +13,9 @@ use GraphQL\Error\Error;
 
 class HistoricalOrderMutation
 {
-    public function archive($root, array $args): HistoricalOrders
+        public function archive($root, array $args): HistoricalOrders
     {
         return DB::transaction(function () use ($args) {
-            // Validar los datos de entrada
-            $validator = Validator::make($args, [
-                'order_id' => 'required|exists:orders,id',
-            ]);
-
-            if ($validator->fails()) {
-                throw new Error('Datos de entrada inválidos: ' . $validator->errors()->first());
-            }
-
 
             // Buscar la orden que pertenezca al usuario autenticado
             $order = Order::with(['orderDetails.product'])->where('id', $args['order_id'])->first();
@@ -33,9 +24,10 @@ class HistoricalOrderMutation
                 throw new Error('Orden no encontrada');
             }
 
+            
             // Verificar que la orden esté en un estado que permita archivar
-            if ($order->status !== 'completed' && $order->status !== 'delivered') {
-                throw new Error('Solo se pueden archivar órdenes completadas o entregadas');
+            if ($args['new_status'] != 'cancelled' && $args['new_status'] != 'delivered') {
+                throw new Error('Solo se pueden archivar órdenes entregadas o canceladas');
             }
 
             // Crear el registro histórico de la orden

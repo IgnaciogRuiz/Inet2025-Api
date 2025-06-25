@@ -117,32 +117,29 @@ class ProductMutation
                 }
             }
 
-            // Refrescar producto con relaciones
-            return $product->fresh(['flights', 'stays', 'cars']);
-        });
-    }
-    public function deleteFull($root, array $args): array
-    {
-        return DB::transaction(function () use ($args) {
-
-            $product = Product::find($args['id']);
-            if (!$product) {
-                throw new Error('Producto no encontrado');
-            }
-
-
-            $product->flights()->detach();
-
-            $product->stays()->detach();
-
-            $product->cars()->detach();
-
-            $product->delete();
-
+            // Recargar relaciones
             return [
-                'success' => true,
-                'message' => 'Producto eliminado correctamente',
+                'message' => 'Producto actualizado correctamente',
+                'product' => $product->fresh(['flights', 'stays', 'cars']),
             ];
         });
+
+            
     }
+    public function toggleProductEnabled($root, array $args): array
+{
+    $product = Product::find($args['id']);
+    
+    if (!$product) {
+        throw new Error('Producto no encontrado');
+    }
+
+    $product->active = !$product->active;
+    $product->save();
+
+    return [
+        'success' => true,
+        'message' => $product->active ? 'Producto habilitado' : 'Producto deshabilitado',
+    ];
+}
 }
